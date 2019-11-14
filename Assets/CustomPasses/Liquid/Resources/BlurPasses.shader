@@ -55,6 +55,7 @@
 
 	float2 GetSampleUVs(Varyings varyings)
 	{
+		// TODO: simplify this
 		float depth = LoadCameraDepth(varyings.positionCS.xy);
 		//float linearDepth = Linear01Depth(depth,_ZBufferParams);
 		PositionInputs posInput = GetPositionInput(varyings.positionCS.xy, _ViewPortSize.zw, depth, UNITY_MATRIX_I_VP, UNITY_MATRIX_V);
@@ -74,7 +75,9 @@
 
 		float4 color = SAMPLE_TEXTURE2D_X_LOD(_Source, s_trilinear_clamp_sampler, ClampUV(texcoord), 0) * gaussianWeights[0];
 
-		float radius = _Radius / SAMPLE_COUNT;
+		float linearDepth = LinearEyeDepth(LoadCustomDepth(varyings.positionCS.xy), _ZBufferParams);
+
+		float radius = (_Radius / linearDepth) / SAMPLE_COUNT;
 		for (int j = 1; j < SAMPLE_COUNT; j++)
 		{
 			float2 uvOffset = float2(1, 0) * j * radius;
@@ -93,7 +96,9 @@
 
 		float4 color = SAMPLE_TEXTURE2D_X_LOD(_Source, s_trilinear_clamp_sampler, ClampUV(texcoord), 0) * gaussianWeights[0];
 
-		float radius = _Radius / SAMPLE_COUNT;
+		float linearDepth = LinearEyeDepth(LoadCustomDepth(varyings.positionCS.xy), _ZBufferParams);
+
+		float radius = (_Radius / linearDepth) / SAMPLE_COUNT;
 		for (int j = 1; j < SAMPLE_COUNT; j++)
 		{
 			float2 uvOffset = float2(0, 1) * j * radius;
